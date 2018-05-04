@@ -8,6 +8,11 @@ const CURRENCY = 'USD';
 const YEAR = 2018;
 const MONTH = 3;  //(integer) number of month
 
+//set output file variables
+$header = 'R00' . SEPARATOR . 'T09' . PHP_EOL;
+$prefix = 'R01';
+$postfix = '1';
+
 //start and end date for parsing (unix time)
 $begin = strtotime('01-' . MONTH . '-' . YEAR);
 $end = strtotime("+1 month", $begin) - 1;
@@ -31,12 +36,16 @@ $fileName = 'output_EUR_' . CURRENCY . '_' . date('M_Y', $begin) . '.csv';
 $file = fopen($fileName, 'w+');
 
 
+//add header
+echo $header, "</br>";
+file_put_contents($fileName, $header, FILE_APPEND);
+
+
 //parse and write file
 for ($i = $len - 1; $i >= 0; $i--) {
 
     $day = $days[$i];
     $unixDay = strtotime($day['time']);
-
 
     //find all records for set month
     if ($unixDay >= $begin && $unixDay <= $end) {
@@ -47,11 +56,12 @@ for ($i = $len - 1; $i >= 0; $i--) {
             if ($row['currency'] == CURRENCY) {
 
                 $dateString = date('d.m.Y', strtotime($day['time']));
-                $record = $dateString . SEPARATOR . $row['currency'] . SEPARATOR . $row['rate'] . PHP_EOL;
+                $record = $dateString . SEPARATOR . $row['currency'] . SEPARATOR . $row['rate'];
+                $fileRow = $prefix . SEPARATOR . $record . SEPARATOR . $postfix . PHP_EOL;
 
-                echo $record, "</br>";
+                echo $fileRow, "</br>";
                 //write record to file
-                file_put_contents($fileName, $record, FILE_APPEND);
+                file_put_contents($fileName, $fileRow, FILE_APPEND);
             }
         }
     }
